@@ -27,10 +27,10 @@ Sistema de controle financeiro pessoal. Registre receitas e despesas, organize p
 
 ### 🔄 Sprint 2 — Núcleo e Funcionalidades Base *(em andamento 18/05/2026)*
 - [x] Estrutura Maven configurada (pom.xml)
-- [ ] UC01 — Gerenciar Categorias implementado
-- [ ] UC02 — Registrar Transação implementado
-- [ ] Testes unitários da camada Service
-- [ ] Commits semanais de todos os membros
+- [X] UC01 — Gerenciar Categorias implementado
+- [X] UC02 — Registrar Transação implementado
+- [X] Testes unitários da camada Service
+- [X] Commits semanais de todos os membros
 
 ### ⏳ Sprint 3 — Funcionalidades Completas e Testes
 - [ ] UC03 — Consultar Transações com filtros
