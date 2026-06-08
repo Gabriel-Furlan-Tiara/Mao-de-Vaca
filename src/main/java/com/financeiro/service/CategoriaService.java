@@ -14,7 +14,7 @@ public class CategoriaService {
     //CRIA NOVA CATEGORIA COM NOME
     //SE NOME FOR VAZIO AVISA
     public Categoria criar(Categoria categoria) throws SQLException {
-        if (categoria.getNome() == null || categoria.getNome().isEmpty()) {
+        if (categoria.getNome() == null || categoria.getNome().isBlank()) {
             throw new IllegalArgumentException("É obrigatório por nome na categoria");
         }
         //TIPO DA CATEGORIA
@@ -63,7 +63,7 @@ public class CategoriaService {
         }
         //NÃO PERMITE EXCLUIR SE ESTIVER EM USO
         if (repository.possuiTransacoesVinculadas(id)) {
-            throw new IllegalArgumentException("Não foi possível excluir, categoria esta vinculada a uma transação");
+            throw new IllegalStateException("Não foi possível excluir, categoria esta vinculada a uma transação");
         }
         //EXCLUI APÓS VALIDAÇÃO
         repository.excluir(id);
@@ -76,4 +76,3 @@ public class CategoriaService {
         }
     }
 }
-

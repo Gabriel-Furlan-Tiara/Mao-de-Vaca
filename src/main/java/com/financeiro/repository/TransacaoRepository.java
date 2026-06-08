@@ -37,6 +37,28 @@ public class TransacaoRepository {
         return lista;
     }
 
+    // busca transações de um mês/ano específico (para o relatório - UC04)
+    public List<Transacao> buscarPorMesAno(int mes, int ano) throws SQLException {
+        String sql = "SELECT id, tipo, valor, data, descricao, categoria_id " +
+                "FROM transacoes " +
+                "WHERE EXTRACT(MONTH FROM data) = ? AND EXTRACT(YEAR FROM data) = ? " +
+                "ORDER BY data";
+        List<Transacao> lista = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, mes);
+            stmt.setInt(2, ano);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                lista.add(mapear(rs));
+            }
+        }
+        return lista;
+    }
+
     public Optional<Transacao> buscarPorId(int id) throws SQLException {
         String sql = "SELECT id, tipo, valor, data, descricao, categoria_id FROM transacoes WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
