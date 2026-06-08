@@ -1,5 +1,4 @@
 package com.financeiro.service;
-
 import com.financeiro.database.DatabaseConnection;
 import com.financeiro.model.Categoria;
 import com.financeiro.model.Transacao;
@@ -8,14 +7,11 @@ import com.financeiro.repository.TransacaoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import java.sql.SQLException;
 import java.time.LocalDate;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class TransacaoServiceTest {
-
     private TransacaoService service;
     private int categoriaIdValido; // guarda o ID de uma categoria real para usar nos testes
 

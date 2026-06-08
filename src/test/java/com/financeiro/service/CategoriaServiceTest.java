@@ -1,18 +1,14 @@
 package com.financeiro.service;
-
 import com.financeiro.database.DatabaseConnection;
 import com.financeiro.model.Categoria;
 import com.financeiro.repository.CategoriaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import java.sql.SQLException;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class CategoriaServiceTest {
-
     private CategoriaService service;
 
     // roda antes de CADA teste — garante que o banco existe e cria um service novo
