@@ -33,10 +33,10 @@ Sistema de controle financeiro pessoal. Registre receitas e despesas, organize p
 - [X] Commits semanais de todos os membros
 
 ### ⏳ Sprint 3 — Funcionalidades Completas e Testes
-- [ ] UC03 — Consultar Transações com filtros
+- [X] UC03 — Consultar Transações com filtros
 - [ ] UC04 — Gerar Relatório Mensal
 - [ ] Testes unitários e de integração
-- [ ] Readme atualizado com instruções de implantação
+- [X] Readme atualizado com instruções de implantação
 
 ### ⏳ Sprint 4 — Entrega Final e Apresentação
 - [ ] 100% das funcionalidades entregues e testadas
