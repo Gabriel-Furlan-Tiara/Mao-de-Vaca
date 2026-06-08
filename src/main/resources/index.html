@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mão de Vaca — Controle da Fazenda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --grass-1:#8FCB6A;        /* pasto claro */
+      --grass-2:#6BA844;        /* pasto escuro */
+      --sky-1:#BFE8FF;          /* céu topo */
+      --sky-2:#E9F8E4;          /* céu/horizonte */
+      --wood:#A9743F;           /* madeira */
+      --wood-dark:#7A4F25;      /* madeira escura */
+      --wood-light:#C89B6B;     /* madeira clara */
+      --cream:#FFF8EC;          /* placa/cartão */
+      --ink:#43331F;            /* texto marrom */
+      --ink-soft:#7A6444;
+      --leite:#FFFDF8;
+      --verde-grana:#2E8B57;    /* receita */
+      --vermelho:#C0492F;       /* despesa */
+      --dourado:#E8A33D;        /* destaque */
+      --sombra:0 8px 0 rgba(0,0,0,.12);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+
+    html{scroll-behavior:smooth}
+
+    body{
+      font-family:'Nunito',sans-serif;
+      color:var(--ink);
+      min-height:100vh;
+      background:
+              radial-gradient(circle at 80% 8%, #FFF3B0 0 60px, transparent 61px), /* sol */
+              linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 38%, var(--grass-1) 38%, var(--grass-2) 100%);
+      background-attachment:fixed;
+    }
+
+    /* colina ondulada atrás do conteúdo */
+    body::before{
+      content:"";
+      position:fixed; left:0; right:0; top:33%;
+      height:90px;
+      background:var(--grass-1);
+      border-radius:50% 50% 0 0 / 100% 100% 0 0;
+      transform:scaleX(1.4);
+      z-index:0;
+      opacity:.6;
+    }
+
+    .wrap{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:28px 18px 80px}
+
+    /* ===== CABEÇALHO / PLACA DE MADEIRA ===== */
+    header{text-align:center;margin-bottom:26px}
+    .placa{
+      display:inline-block;
+      background:linear-gradient(180deg,var(--wood-light),var(--wood));
+      border:5px solid var(--wood-dark);
+      border-radius:18px;
+      padding:18px 40px 20px;
+      box-shadow:var(--sombra);
+      position:relative;
+    }
+    .placa::before,.placa::after{
+      content:"";position:absolute;top:50%;width:16px;height:16px;border-radius:50%;
+      background:var(--wood-dark);transform:translateY(-50%);
+    }
+    .placa::before{left:12px}.placa::after{right:12px}
+    .placa h1{
+      font-family:'Fredoka',sans-serif;font-weight:700;font-size:2.4rem;
+      color:var(--cream);text-shadow:2px 2px 0 var(--wood-dark);letter-spacing:.5px;
+    }
+    .placa p{color:#FBEBD2;font-weight:700;font-size:.95rem;margin-top:2px}
+
+    /* ===== VAQUINHA MASCOTE ===== */
+    .pasto-vaca{display:flex;justify-content:center;align-items:flex-end;gap:16px;margin:6px 0 22px;min-height:140px}
+    .balao{
+      background:var(--cream);border:3px solid var(--wood);border-radius:16px;
+      padding:10px 16px;font-weight:800;color:var(--ink);max-width:230px;
+      position:relative;box-shadow:var(--sombra);font-size:.95rem;
+    }
+    .balao::after{
+      content:"";position:absolute;right:-14px;bottom:18px;
+      border:8px solid transparent;border-left-color:var(--wood);
+    }
+    .vaca{font-size:5.2rem;line-height:1;cursor:pointer;user-select:none;
+      transition:transform .25s ease;filter:drop-shadow(0 6px 0 rgba(0,0,0,.12))}
+    .vaca:hover{transform:scale(1.08) rotate(-3deg)}
+    .vaca.feliz{animation:pula 1.2s ease infinite}
+    .vaca.triste{filter:grayscale(.4) drop-shadow(0 6px 0 rgba(0,0,0,.12));transform:rotate(4deg)}
+    @keyframes pula{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+
+    /* ===== ABAS ===== */
+    .abas{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+    .aba{
+      font-family:'Fredoka',sans-serif;font-weight:600;font-size:1.05rem;cursor:pointer;
+      background:var(--cream);color:var(--ink);border:3px solid var(--wood);
+      padding:10px 22px;border-radius:14px 14px 0 0;box-shadow:0 4px 0 var(--wood-dark);
+      transition:transform .12s ease, background .2s;
+    }
+    .aba:hover{transform:translateY(-2px)}
+    .aba.ativa{background:var(--dourado);color:var(--ink);transform:translateY(0)}
+
+    /* ===== PAINÉIS / TÁBUAS ===== */
+    .painel{display:none;animation:entra .35s ease}
+    .painel.ativo{display:block}
+    @keyframes entra{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+    .tabua{
+      background:
+              repeating-linear-gradient(90deg, rgba(0,0,0,.03) 0 2px, transparent 2px 60px),
+              linear-gradient(180deg,var(--cream),#FBEFD9);
+      border:4px solid var(--wood);border-radius:18px;padding:22px;
+      box-shadow:var(--sombra);margin-bottom:20px;
+    }
+    .tabua h2{font-family:'Fredoka',sans-serif;font-size:1.4rem;margin-bottom:14px;color:var(--ink);
+      display:flex;align-items:center;gap:8px}
+
+    /* ===== FORMULÁRIOS ===== */
+    .campo{margin-bottom:12px}
+    .campo label{display:block;font-weight:800;margin-bottom:5px;color:var(--ink-soft);font-size:.9rem}
+    input,select{
+      width:100%;font-family:'Nunito',sans-serif;font-weight:700;font-size:1rem;color:var(--ink);
+      background:var(--leite);border:3px solid var(--wood-light);border-radius:12px;padding:11px 13px;
+      transition:border-color .2s, box-shadow .2s;
+    }
+    input:focus,select:focus{outline:none;border-color:var(--dourado);box-shadow:0 0 0 4px rgba(232,163,61,.25)}
+    .linha{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+    .btn{
+      font-family:'Fredoka',sans-serif;font-weight:600;font-size:1.05rem;cursor:pointer;color:var(--cream);
+      background:var(--verde-grana);border:none;border-radius:14px;padding:12px 22px;
+      box-shadow:0 5px 0 #1f6b41;transition:transform .1s, box-shadow .1s;width:100%;margin-top:6px;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn:active{transform:translateY(4px);box-shadow:0 1px 0 #1f6b41}
+    .btn.dourado{background:var(--dourado);box-shadow:0 5px 0 #b87e22;color:var(--ink)}
+    .btn.dourado:active{box-shadow:0 1px 0 #b87e22}
+
+    /* ===== LISTAS ===== */
+    .lista{margin-top:8px;display:flex;flex-direction:column;gap:9px}
+    .item{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      background:var(--leite);border:2px solid var(--wood-light);border-left:7px solid var(--dourado);
+      border-radius:12px;padding:11px 14px;animation:entra .3s ease;
+    }
+    .item.receita{border-left-color:var(--verde-grana)}
+    .item.despesa{border-left-color:var(--vermelho)}
+    .item .info{display:flex;flex-direction:column}
+    .item .titulo{font-weight:800;color:var(--ink)}
+    .item .sub{font-size:.82rem;color:var(--ink-soft);font-weight:700}
+    .item .valor{font-family:'Fredoka',sans-serif;font-weight:600;font-size:1.1rem;white-space:nowrap}
+    .item .valor.receita{color:var(--verde-grana)}
+    .item .valor.despesa{color:var(--vermelho)}
+    .tag{font-size:.72rem;font-weight:800;padding:3px 9px;border-radius:20px;background:var(--wood-light);color:var(--cream)}
+    .vazio{text-align:center;color:var(--ink-soft);font-weight:700;padding:18px;font-style:italic}
+
+    /* ===== RELATÓRIO ===== */
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+    .card{
+      background:var(--leite);border:3px solid var(--wood-light);border-radius:14px;
+      padding:16px;text-align:center;
+    }
+    .card .rotulo{font-size:.8rem;font-weight:800;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px}
+    .card .numero{font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.5rem;margin-top:4px}
+    .card.receita .numero{color:var(--verde-grana)}
+    .card.despesa .numero{color:var(--vermelho)}
+    .card.saldo{grid-column:1/-1;border-color:var(--dourado);border-width:4px}
+    .card.saldo .numero{font-size:2rem}
+    .card.saldo.pos .numero{color:var(--verde-grana)}
+    .card.saldo.neg .numero{color:var(--vermelho)}
+    .extra{margin-top:12px;text-align:center;font-weight:700;color:var(--ink-soft)}
+    .extra b{color:var(--ink)}
+
+    /* ===== TOAST (placa-aviso) ===== */
+    #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);
+      background:var(--cream);border:3px solid var(--wood);border-left:8px solid var(--verde-grana);
+      border-radius:12px;padding:12px 20px;font-weight:800;color:var(--ink);box-shadow:var(--sombra);
+      z-index:50;transition:transform .35s cubic-bezier(.2,1.4,.5,1);max-width:90%}
+    #toast.erro{border-left-color:var(--vermelho)}
+    #toast.show{transform:translateX(-50%) translateY(0)}
+
+    footer{text-align:center;margin-top:30px;color:var(--ink-soft);font-weight:700;font-size:.85rem}
+
+    @media (max-width:620px){
+      .linha,.cards{grid-template-columns:1fr}
+      .placa h1{font-size:1.7rem}
+      .pasto-vaca{flex-direction:column;gap:8px}
+      .balao::after{display:none}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="placa">
+      <h1>🐄 Mão de Vaca</h1>
+      <p>Controle financeiro lá da fazenda</p>
+    </div>
+  </header>
+
+  <!-- vaquinha mascote -->
+  <div class="pasto-vaca">
+    <div class="balao" id="balao">Muuu! Bora cuidar do dinheiro? 🌾</div>
+    <div class="vaca feliz" id="vaca" title="Clica em mim!">🐄</div>
+  </div>
+
+  <!-- abas -->
+  <div class="abas">
+    <button class="aba ativa" data-painel="categorias">🏷️ Categorias</button>
+    <button class="aba" data-painel="transacoes">💰 Transações</button>
+    <button class="aba" data-painel="relatorio">📜 Relatório</button>
+  </div>
+
+  <!-- ===== PAINEL CATEGORIAS ===== -->
+  <section class="painel ativo" id="categorias">
+    <div class="tabua">
+      <h2>🏷️ Nova categoria</h2>
+      <div class="campo">
+        <label for="cat-nome">Nome</label>
+        <input id="cat-nome" placeholder="Ex: Ração, Leite, Sementes..." />
+      </div>
+      <div class="campo">
+        <label for="cat-tipo">Tipo</label>
+        <select id="cat-tipo">
+          <option value="DESPESA">Despesa</option>
+          <option value="RECEITA">Receita</option>
+          <option value="AMBOS">Ambos</option>
+        </select>
+      </div>
+      <button class="btn" onclick="criarCategoria()">Plantar categoria 🌱</button>
+    </div>
+
+    <div class="tabua">
+      <h2>📋 Categorias do curral</h2>
+      <div class="lista" id="lista-categorias"><div class="vazio">Carregando...</div></div>
+    </div>
+  </section>
+
+  <!-- ===== PAINEL TRANSAÇÕES ===== -->
+  <section class="painel" id="transacoes">
+    <div class="tabua">
+      <h2>💰 Nova transação</h2>
+      <div class="linha">
+        <div class="campo">
+          <label for="t-tipo">Tipo</label>
+          <select id="t-tipo">
+            <option value="DESPESA">Despesa</option>
+            <option value="RECEITA">Receita</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="t-valor">Valor (R$)</label>
+          <input id="t-valor" type="number" step="0.01" min="0" placeholder="0,00" />
+        </div>
+      </div>
+      <div class="linha">
+        <div class="campo">
+          <label for="t-data">Data</label>
+          <input id="t-data" type="date" />
+        </div>
+        <div class="campo">
+          <label for="t-cat">Categoria</label>
+          <select id="t-cat"></select>
+        </div>
+      </div>
+      <div class="campo">
+        <label for="t-desc">Descrição</label>
+        <input id="t-desc" placeholder="Ex: Compra de ração na cooperativa" />
+      </div>
+      <button class="btn" onclick="criarTransacao()">Registrar no caderno 📒</button>
+    </div>
+
+    <div class="tabua">
+      <h2>📒 Caderno de movimentações</h2>
+      <div class="lista" id="lista-transacoes"><div class="vazio">Carregando...</div></div>
+    </div>
+  </section>
+
+  <!-- ===== PAINEL RELATÓRIO ===== -->
+  <section class="painel" id="relatorio">
+    <div class="tabua">
+      <h2>📜 Fechamento do mês</h2>
+      <div class="linha">
+        <div class="campo">
+          <label for="r-mes">Mês</label>
+          <select id="r-mes"></select>
+        </div>
+        <div class="campo">
+          <label for="r-ano">Ano</label>
+          <input id="r-ano" type="number" value="2026" />
+        </div>
+      </div>
+      <button class="btn dourado" onclick="gerarRelatorio()">Conferir o gado 🐄📊</button>
+    </div>
+
+    <div class="tabua" id="box-relatorio" style="display:none">
+      <h2>📊 Resultado de <span id="r-periodo"></span></h2>
+      <div class="cards">
+        <div class="card receita">
+          <div class="rotulo">Entrou</div>
+          <div class="numero" id="r-receitas">R$ 0,00</div>
+        </div>
+        <div class="card despesa">
+          <div class="rotulo">Saiu</div>
+          <div class="numero" id="r-despesas">R$ 0,00</div>
+        </div>
+        <div class="card">
+          <div class="rotulo">Transações</div>
+          <div class="numero" id="r-qtd" style="color:var(--ink)">0</div>
+        </div>
+        <div class="card saldo" id="card-saldo">
+          <div class="rotulo">Saldo do mês</div>
+          <div class="numero" id="r-saldo">R$ 0,00</div>
+        </div>
+      </div>
+      <div class="extra" id="r-extra"></div>
+    </div>
+  </section>
+
+  <footer>Feito na fazenda • Mão de Vaca © 2026</footer>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const API = ""; // mesma origem do servidor (localhost:8080)
+
+  // ---------- util ----------
+  const real = v => "R$ " + Number(v).toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  function toast(msg, erro=false){
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = erro ? "erro show" : "show";
+    setTimeout(()=> t.classList.remove("show"), 3000);
+  }
+
+  function falaVaca(msg, humor){ // humor: feliz | triste | neutro
+    document.getElementById("balao").textContent = msg;
+    const vaca = document.getElementById("vaca");
+    vaca.className = "vaca " + (humor === "feliz" ? "feliz" : humor === "triste" ? "triste" : "");
+  }
+
+  // clique na vaca = mensagens fofas
+  const muus = ["Muuu! 🐮", "Tô de olho nos gastos! 👀", "Economiza aí, hein! 💰", "Que dia lindo na fazenda! ☀️", "Já registrou suas contas hoje?"];
+  document.getElementById("vaca").addEventListener("click", ()=>{
+    falaVaca(muus[Math.floor(Math.random()*muus.length)], "feliz");
+  });
+
+  // ---------- abas ----------
+  document.querySelectorAll(".aba").forEach(aba=>{
+    aba.addEventListener("click", ()=>{
+      document.querySelectorAll(".aba").forEach(a=>a.classList.remove("ativa"));
+      document.querySelectorAll(".painel").forEach(p=>p.classList.remove("ativo"));
+      aba.classList.add("ativa");
+      document.getElementById(aba.dataset.painel).classList.add("ativo");
+    });
+  });
+
+  // ---------- CATEGORIAS ----------
+  async function criarCategoria(){
+    const nome = document.getElementById("cat-nome").value.trim();
+    const tipo = document.getElementById("cat-tipo").value;
+    if(!nome){ toast("Dá um nome pra categoria 🌾", true); return; }
+    try{
+      const resp = await fetch(API + "/api/categorias", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({nome, tipo})
+      });
+      const dado = await resp.json();
+      if(!resp.ok){ toast(dado.erro || "Não rolou 😕", true); return; }
+      toast("Categoria criada! 🌱");
+      document.getElementById("cat-nome").value = "";
+      falaVaca("Boa! Mais uma categoria no curral 🏷️", "feliz");
+      carregarCategorias();
+    }catch(e){ toast("Servidor fora do ar? 🐄", true); }
+  }
+
+  async function carregarCategorias(){
+    const box = document.getElementById("lista-categorias");
+    try{
+      const resp = await fetch(API + "/api/categorias");
+      const lista = await resp.json();
+      // preenche o select de transações também
+      const sel = document.getElementById("t-cat");
+      sel.innerHTML = "";
+      if(lista.length === 0){
+        box.innerHTML = '<div class="vazio">Nenhuma categoria ainda. Cria a primeira! 🌱</div>';
+        sel.innerHTML = '<option value="">Crie uma categoria primeiro</option>';
+        return;
+      }
+      box.innerHTML = "";
+      lista.forEach(c=>{
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `<div class="info"><span class="titulo">${escapeHtml(c.nome)}</span></div>
+                         <span class="tag">${c.tipo}</span>`;
+        box.appendChild(div);
+        const opt = document.createElement("option");
+        opt.value = c.id; opt.textContent = c.nome;
+        sel.appendChild(opt);
+      });
+    }catch(e){ box.innerHTML = '<div class="vazio">Erro ao carregar 😕</div>'; }
+  }
+
+  // ---------- TRANSAÇÕES ----------
+  async function criarTransacao(){
+    const tipo = document.getElementById("t-tipo").value;
+    const valor = parseFloat(document.getElementById("t-valor").value);
+    const data = document.getElementById("t-data").value;
+    const descricao = document.getElementById("t-desc").value.trim();
+    const categoriaId = parseInt(document.getElementById("t-cat").value);
+
+    if(!valor || valor <= 0){ toast("Coloca um valor maior que zero 💰", true); return; }
+    if(!data){ toast("Escolhe a data 📅", true); return; }
+    if(!descricao){ toast("Descreve a transação 📝", true); return; }
+    if(!categoriaId){ toast("Escolhe uma categoria 🏷️", true); return; }
+
+    try{
+      const resp = await fetch(API + "/api/transacoes", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({tipo, valor, data, descricao, categoriaId})
+      });
+      const dado = await resp.json();
+      if(!resp.ok){ toast(dado.erro || "Não rolou 😕", true); return; }
+      toast("Transação registrada! 📒");
+      document.getElementById("t-valor").value = "";
+      document.getElementById("t-desc").value = "";
+      falaVaca(tipo === "RECEITA" ? "Dindin entrando! 🤑" : "Anotado no caderno 📒", "feliz");
+      carregarTransacoes();
+    }catch(e){ toast("Servidor fora do ar? 🐄", true); }
+  }
+
+  async function carregarTransacoes(){
+    const box = document.getElementById("lista-transacoes");
+    try{
+      const resp = await fetch(API + "/api/transacoes");
+      const lista = await resp.json();
+      if(lista.length === 0){
+        box.innerHTML = '<div class="vazio">Caderno vazio. Registra a primeira! 📒</div>';
+        return;
+      }
+      box.innerHTML = "";
+      lista.forEach(t=>{
+        const ehReceita = t.tipo === "RECEITA";
+        const div = document.createElement("div");
+        div.className = "item " + (ehReceita ? "receita" : "despesa");
+        const sinal = ehReceita ? "+" : "−";
+        div.innerHTML = `
+          <div class="info">
+            <span class="titulo">${escapeHtml(t.descricao)}</span>
+            <span class="sub">${formatarData(t.data)}</span>
+          </div>
+          <span class="valor ${ehReceita ? "receita":"despesa"}">${sinal} ${real(t.valor)}</span>`;
+        box.appendChild(div);
+      });
+    }catch(e){ box.innerHTML = '<div class="vazio">Erro ao carregar 😕</div>'; }
+  }
+
+  // ---------- RELATÓRIO ----------
+  async function gerarRelatorio(){
+    const mes = document.getElementById("r-mes").value;
+    const ano = document.getElementById("r-ano").value;
+    try{
+      const resp = await fetch(`${API}/api/relatorios?mes=${mes}&ano=${ano}`);
+      const r = await resp.json();
+      if(!resp.ok){ toast(r.erro || "Não rolou 😕", true); return; }
+
+      const box = document.getElementById("box-relatorio");
+      box.style.display = "block";
+      document.getElementById("r-periodo").textContent = `${String(mes).padStart(2,"0")}/${ano}`;
+
+      if(r.situacao === "SEM_MOVIMENTACAO"){
+        document.getElementById("r-receitas").textContent = real(0);
+        document.getElementById("r-despesas").textContent = real(0);
+        document.getElementById("r-qtd").textContent = "0";
+        document.getElementById("r-saldo").textContent = real(0);
+        document.getElementById("r-extra").innerHTML = "Nenhuma transação nesse mês 🌾";
+        falaVaca("Mês paradão, sem movimento 😴", "neutro");
+        return;
+      }
+
+      animarNumero("r-receitas", r.totalReceitas, true);
+      animarNumero("r-despesas", r.totalDespesas, true);
+      animarNumero("r-qtd", r.quantidadeTransacoes, false);
+      animarNumero("r-saldo", r.saldo, true);
+
+      const cardSaldo = document.getElementById("card-saldo");
+      cardSaldo.className = "card saldo " + (r.saldo >= 0 ? "pos" : "neg");
+
+      document.getElementById("r-extra").innerHTML =
+              `Maior gasto foi em <b>${escapeHtml(r.categoriaMaiorGasto)}</b> (${real(r.valorMaiorGasto)})`;
+
+      // a vaca reage ao saldo!
+      if(r.saldo > 0) falaVaca("UHUL! Sobrou grana esse mês! 🎉🐄", "feliz");
+      else if(r.saldo < 0) falaVaca("Eita... gastou mais do que entrou 😟", "triste");
+      else falaVaca("Empatou: nem sobrou nem faltou 😐", "neutro");
+
+    }catch(e){ toast("Servidor fora do ar? 🐄", true); }
+  }
+
+  // anima o número subindo até o valor final
+  function animarNumero(id, alvo, ehDinheiro){
+    const el = document.getElementById(id);
+    const dur = 700, ini = performance.now();
+    function passo(agora){
+      const p = Math.min((agora - ini)/dur, 1);
+      const atual = alvo * (0.5 - Math.cos(p*Math.PI)/2); // easing
+      el.textContent = ehDinheiro ? real(atual) : Math.round(atual);
+      if(p < 1) requestAnimationFrame(passo);
+      else el.textContent = ehDinheiro ? real(alvo) : alvo;
+    }
+    requestAnimationFrame(passo);
+  }
+
+  // ---------- helpers ----------
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+  function formatarData(d){
+    if(!d) return "";
+    const [a,m,dia] = d.split("-");
+    return `${dia}/${m}/${a}`;
+  }
+
+  // ---------- inicialização ----------
+  function init(){
+    // data de hoje no campo de transação
+    document.getElementById("t-data").value = new Date().toISOString().slice(0,10);
+    // mês atual no relatório
+    const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+    const selMes = document.getElementById("r-mes");
+    meses.forEach((nome,i)=>{
+      const o = document.createElement("option");
+      o.value = i+1; o.textContent = nome;
+      selMes.appendChild(o);
+    });
+    selMes.value = new Date().getMonth()+1;
+    document.getElementById("r-ano").value = new Date().getFullYear();
+
+    carregarCategorias();
+    carregarTransacoes();
+  }
+  init();
+</script>
+</body>
+</html>
