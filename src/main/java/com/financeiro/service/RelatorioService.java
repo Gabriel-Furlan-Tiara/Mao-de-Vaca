@@ -77,7 +77,7 @@ public class RelatorioService {
         return r;
     }
 
-    // Versao em texto, usada pelo menu de console.
+    /* Versao em texto, usada pelo menu de console.
     public String gerarRelatorioMensal(int mes, int ano) throws SQLException {
         RelatorioMensal r = gerarDados(mes, ano);
         if (r.getSituacao().equals("SEM_MOVIMENTACAO")) {
@@ -99,4 +99,6 @@ public class RelatorioService {
         sb.append("========================================\n");
         return sb.toString();
     }
+
+     */
 }
